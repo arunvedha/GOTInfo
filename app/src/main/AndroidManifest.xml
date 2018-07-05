@@ -20,7 +20,10 @@
             </intent-filter>
         </activity>
         <activity android:name=".SearchNameActivity" />
-        <activity android:name=".CharInfoActivity"></activity>
+        <provider
+            android:authorities="com.example.android.gotinfo"
+            android:name=".DataPackage.DataProvider"
+            android:exported="false"/>
     </application>
 
 </manifest>
