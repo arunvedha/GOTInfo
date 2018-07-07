@@ -13,9 +13,12 @@ import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -40,9 +43,10 @@ public class SearchNameActivity extends AppCompatActivity implements
     private String TAG = "searchActivity";
     private ApiInterface apiInterface;
     TextView nameInfo;
-    TextView titleInfo;
-    TextView houseInfo;
-    TextView spouseInfo;
+    TextView titleInfo,TITLE;
+    TextView houseInfo,HOUSE;
+    TextView spouseInfo,SPOUSE;
+    TextView noResult;
     String titles = "";
     ImageView imageView;
     Data data;
@@ -64,7 +68,12 @@ public class SearchNameActivity extends AppCompatActivity implements
         titleInfo = findViewById(R.id.titles);
         houseInfo = findViewById(R.id.house);
         spouseInfo = findViewById(R.id.spouse);
+        noResult = findViewById(R.id.no_result);
+        TITLE = findViewById(R.id.TITLES);
+        HOUSE = findViewById(R.id.HOUSE);
+        SPOUSE = findViewById(R.id.SPOUSE);
         imageView = findViewById(R.id.image_view);
+        setVisiblityGone();
 
         if (mCurrentDataUri == null) {
             apiInterface = ApiClient.getClient().create(ApiInterface.class);
@@ -72,24 +81,43 @@ public class SearchNameActivity extends AppCompatActivity implements
             call.enqueue(new Callback<NameResponse>() {
                 @Override
                 public void onResponse(Call<NameResponse> call, Response<NameResponse> response) {
-                     data = response.body().getData();
-                     text = data.getName();
-                     spouse = data.getSpouse();
-                     house= data.getHouse();
-                     size = data.getTitles().size();
-                    final String[] titleArray = new String[size];
 
-                    for (int i=0;i<size;i++){
-                        titleArray[i]=data.getTitles().get(i);
-                        titles+= titleArray[i]+"\n";
+                    if (response.body() == null) {
+                        imageView.setImageResource(R.drawable.no_results_found);
+                        Log.e(TAG, "checking for log here 1");
+                        nameInfo.setVisibility(View.GONE);
+                        titleInfo.setVisibility(View.GONE);
+                        houseInfo.setVisibility(View.GONE);
+                        spouseInfo.setVisibility(View.GONE);
+                        setVisiblityGone();
+                        noResult.setText("THERE IS NO SUCH CHARACTER," + "\nARE YOU SURE YOU TYPED THE RIGHT NAME?");
+                        noResult.setTextSize(15);
+                    } else {
+                        Log.e(TAG, "checking for log here 2");
+                        data = response.body().getData();
+                        text = data.getName();
+                        spouse = data.getSpouse();
+                        house = data.getHouse();
+                        size = data.getTitles().size();
+                        final String[] titleArray = new String[size];
+
+                        for (int i = 0; i < size; i++) {
+                            titleArray[i] = data.getTitles().get(i);
+                            titles += titleArray[i] + "\n";
+                        }
+                        Log.e(TAG, "to check if name was returned " + text);
+                        nameInfo.setText(text);
+                        titleInfo.setText(titles);
+                        houseInfo.setText(house);
+                        spouseInfo.setText(spouse);
+                        nameInfo.setVisibility(View.VISIBLE);
+                        titleInfo.setVisibility(View.VISIBLE);
+                        houseInfo.setVisibility(View.VISIBLE);
+                        spouseInfo.setVisibility(View.VISIBLE);
+                        Picasso.get().load("https://api.got.show" + data.getImageLink()).into(imageView);
+                        saveData();
+
                     }
-                    Log.e(TAG,"to check if name was returned " + text);
-                    nameInfo.setText(text);
-                    titleInfo.setText(titles);
-                    houseInfo.setText(house);
-                    spouseInfo.setText(spouse);
-                    Picasso.get().load(data.getImageLink()).into(imageView);
-                    saveData();
                 }
 
                 @Override
@@ -113,20 +141,7 @@ public class SearchNameActivity extends AppCompatActivity implements
         values.put(DataContract.DataEntry.COLUMN_SPOUSE,spouse);
 
 
-        // Determine if this is a new or existing pet by checking if mCurrentPetUri is null or not
-        if (mCurrentDataUri == null) {
-            Uri newUri = getContentResolver().insert(DataContract.DataEntry.CONTENT_URI, values);
-            if (newUri == null) {
-                // If the new content URI is null, then there was an error with insertion.
-                Toast.makeText(SearchNameActivity.this, "INSERTION FAILED",
-                        Toast.LENGTH_SHORT).show();
-            } else {
-                // Otherwise, the insertion was successful and we can display a toast.
-                Toast.makeText(SearchNameActivity.this, "INSERTION SUCCESSFULL",
-                        Toast.LENGTH_SHORT).show();
-            }
-        }
-        }
+    }
 
     @Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
@@ -165,16 +180,16 @@ public class SearchNameActivity extends AppCompatActivity implements
             // Extract out the value from the Cursor for the given column index
             String name = cursor.getString(nameColumnIndex);
             String house = cursor.getString(houseColumnIndex);
-            int spouse = cursor.getInt(spouseColumnIndex);
-            int titles = cursor.getInt(titleColumnIndex);
+            String spouse = cursor.getString(spouseColumnIndex);
+            String titles = cursor.getString(titleColumnIndex);
 
             nameInfo.setText(name);
             houseInfo.setText(house);
             spouseInfo.setText(spouse);
             titleInfo.setText(titles);
 
-            }
         }
+    }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
@@ -184,7 +199,34 @@ public class SearchNameActivity extends AppCompatActivity implements
         titleInfo.setText("");
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu)
+    {
+        getMenuInflater().inflate(R.menu.menu_search, menu);
+        return true;
     }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
+        switch (item.getItemId())
+        {
+            case R.id.locations:
+                Intent myIntent = new Intent(SearchNameActivity.this, LocationActivity.class);
+                myIntent.putExtra("name",text);
+                SearchNameActivity.this.startActivity(myIntent);
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+    public void setVisiblityGone(){
+        TITLE.setVisibility(View.GONE);
+        HOUSE.setVisibility(View.GONE);
+        SPOUSE.setVisibility(View.GONE);
+    }
+
+}
+
 
 
 

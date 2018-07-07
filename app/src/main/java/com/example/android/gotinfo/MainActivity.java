@@ -2,10 +2,13 @@ package com.example.android.gotinfo;
 
 import android.app.LoaderManager;
 import android.content.ContentUris;
+import android.content.Context;
 import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -15,6 +18,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.SearchView;
+import android.widget.Toast;
 
 import com.example.android.gotinfo.DataPackage.DataContract;
 
@@ -23,6 +27,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     private static final int DATA_LOADER=0;
     DataCursorAdapter mCursorAdapter;
     int FLAG = 0;
+    NetworkInfo networkInfo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,6 +40,9 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         View emptyView = findViewById(R.id.empty_view);
         dataListView.setEmptyView(emptyView);
         mCursorAdapter=new DataCursorAdapter(this,null);
+        ConnectivityManager connMgr = (ConnectivityManager)
+                getSystemService(Context.CONNECTIVITY_SERVICE);
+        networkInfo = connMgr.getActiveNetworkInfo();
         dataListView.setAdapter(mCursorAdapter);
         getLoaderManager().initLoader(DATA_LOADER,null,this);
 
@@ -44,7 +52,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id)
             {
                 Intent intent = new Intent(MainActivity.this, SearchNameActivity.class);
-                intent.putExtra("flag",FLAG);
                 Uri currentPetUri = ContentUris.withAppendedId(DataContract.DataEntry.CONTENT_URI, id);
                 intent.setData(currentPetUri);
                 startActivity(intent);
@@ -66,9 +73,14 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                Intent myIntent = new Intent(MainActivity.this, SearchNameActivity.class);
-                myIntent.putExtra("String", query);
-                MainActivity.this.startActivity(myIntent);
+                if (networkInfo != null && networkInfo.isConnected()) {
+
+                    Intent myIntent = new Intent(MainActivity.this, SearchNameActivity.class);
+                    myIntent.putExtra("String", query);
+                    MainActivity.this.startActivity(myIntent);}
+                else
+                    Toast.makeText(MainActivity.this, "CHECK YOUR NETWORK CONNECTIVITY",
+                            Toast.LENGTH_SHORT).show();
                 return false;
             }
 

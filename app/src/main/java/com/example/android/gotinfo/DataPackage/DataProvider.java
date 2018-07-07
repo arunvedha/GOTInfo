@@ -1,5 +1,4 @@
 package com.example.android.gotinfo.DataPackage;
-
 import android.content.ContentProvider;
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -20,8 +19,8 @@ public class DataProvider extends ContentProvider {
 
 
     static {
-        sUriMatcher.addURI("com.example.android.gotinfo", "gotinfo", NAME);
-        sUriMatcher.addURI("com.example.android.gotinfo", "gotinfo/#", NAME_ID);
+        sUriMatcher.addURI("com.example.android.gotinfo", "recents", NAME);
+        sUriMatcher.addURI("com.example.android.gotinfo", "recents/#", NAME_ID);
     }
 
     public static final String LOG_TAG = DataProvider.class.getSimpleName();
@@ -199,4 +198,6 @@ public class DataProvider extends ContentProvider {
         }
     }
 }
+
+
 
