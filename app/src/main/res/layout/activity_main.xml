@@ -8,6 +8,11 @@
     android:padding="16dp"
     tools:context=".MainActivity">
 
+    <ImageView
+        android:src="@drawable/got2"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
     <ListView
         android:id="@+id/list"
         android:layout_width="match_parent"
@@ -24,7 +29,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
-            android:src="@drawable/ic_launcher_background"/>
+            android:src="@drawable/got"/>
 
         <TextView
             android:id="@+id/empty_title_text"

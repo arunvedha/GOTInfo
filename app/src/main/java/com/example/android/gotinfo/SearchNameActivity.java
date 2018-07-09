@@ -27,6 +27,7 @@ import com.example.android.gotinfo.Api.ApiInterface;
 import com.example.android.gotinfo.DataPackage.DataContract;
 import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import retrofit2.Call;
@@ -42,18 +43,13 @@ public class SearchNameActivity extends AppCompatActivity implements
 
     private String TAG = "searchActivity";
     private ApiInterface apiInterface;
-    TextView nameInfo;
-    TextView titleInfo,TITLE;
-    TextView houseInfo,HOUSE;
-    TextView spouseInfo,SPOUSE;
-    TextView noResult;
+    TextView nameInfo,titleInfo,houseInfo,spouseInfo,noResult;
     String titles = "";
     ImageView imageView;
     Data data;
-    String text;
-    String spouse;
-    String house;
+    String text, spouse,house;
     int size;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,11 +65,7 @@ public class SearchNameActivity extends AppCompatActivity implements
         houseInfo = findViewById(R.id.house);
         spouseInfo = findViewById(R.id.spouse);
         noResult = findViewById(R.id.no_result);
-        TITLE = findViewById(R.id.TITLES);
-        HOUSE = findViewById(R.id.HOUSE);
-        SPOUSE = findViewById(R.id.SPOUSE);
         imageView = findViewById(R.id.image_view);
-        setVisiblityGone();
 
         if (mCurrentDataUri == null) {
             apiInterface = ApiClient.getClient().create(ApiInterface.class);
@@ -85,11 +77,6 @@ public class SearchNameActivity extends AppCompatActivity implements
                     if (response.body() == null) {
                         imageView.setImageResource(R.drawable.no_results_found);
                         Log.e(TAG, "checking for log here 1");
-                        nameInfo.setVisibility(View.GONE);
-                        titleInfo.setVisibility(View.GONE);
-                        houseInfo.setVisibility(View.GONE);
-                        spouseInfo.setVisibility(View.GONE);
-                        setVisiblityGone();
                         noResult.setText("THERE IS NO SUCH CHARACTER," + "\nARE YOU SURE YOU TYPED THE RIGHT NAME?");
                         noResult.setTextSize(15);
                     } else {
@@ -110,10 +97,6 @@ public class SearchNameActivity extends AppCompatActivity implements
                         titleInfo.setText(titles);
                         houseInfo.setText(house);
                         spouseInfo.setText(spouse);
-                        nameInfo.setVisibility(View.VISIBLE);
-                        titleInfo.setVisibility(View.VISIBLE);
-                        houseInfo.setVisibility(View.VISIBLE);
-                        spouseInfo.setVisibility(View.VISIBLE);
                         Picasso.get().load("https://api.got.show" + data.getImageLink()).into(imageView);
                         saveData();
 
@@ -219,11 +202,7 @@ public class SearchNameActivity extends AppCompatActivity implements
         }
         return super.onOptionsItemSelected(item);
     }
-    public void setVisiblityGone(){
-        TITLE.setVisibility(View.GONE);
-        HOUSE.setVisibility(View.GONE);
-        SPOUSE.setVisibility(View.GONE);
-    }
+
 
 }
 

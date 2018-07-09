@@ -16,25 +16,35 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.Toast;
 
 import com.example.android.gotinfo.DataPackage.DataContract;
+import com.example.android.gotinfo.DataPackage.DataDbHelper;
+
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final int DATA_LOADER=0;
+    ListAdapter mAdapter;
     DataCursorAdapter mCursorAdapter;
-    int FLAG = 0;
+    int FLAG = 0,textLength;;
+    ListView dataListView;
+    DataDbHelper dbHelper;
     NetworkInfo networkInfo;
+    ListAdapter listAdapter;
+    ArrayList<String> names, array_sort;
+    ImageView remove;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        ListView dataListView = (ListView) findViewById(R.id.list);
+         dataListView = (ListView) findViewById(R.id.list);
 
         // Find and set empty view on the ListView, so that it only shows when the list has 0 items.
         View emptyView = findViewById(R.id.empty_view);
@@ -46,18 +56,18 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         dataListView.setAdapter(mCursorAdapter);
         getLoaderManager().initLoader(DATA_LOADER,null,this);
 
-        dataListView.setOnItemClickListener(new AdapterView.OnItemClickListener()
-        {
+        dataListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int position, long id)
-            {
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
+                final Uri currentUri = ContentUris.withAppendedId(DataContract.DataEntry.CONTENT_URI, dbHelper.getCharId(names.get(position)));
                 Intent intent = new Intent(MainActivity.this, SearchNameActivity.class);
-                Uri currentPetUri = ContentUris.withAppendedId(DataContract.DataEntry.CONTENT_URI, id);
-                intent.setData(currentPetUri);
+                intent.setData(currentUri);
                 startActivity(intent);
+                refreshSearch();
 
             }
         });
+
 
     }
 
@@ -68,6 +78,9 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         // This adds menu items to the app bar.
         getMenuInflater().inflate(R.menu.menu_main, menu);
         MenuItem item = menu.findItem(R.id.search_name);
+        MenuItem menuItemDelete = menu.findItem(R.id.action_delete);
+        menuItemDelete.setVisible(false);
+
         SearchView searchView = (SearchView)item.getActionView();
 
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
@@ -86,6 +99,23 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
             @Override
             public boolean onQueryTextChange(String newText) {
+
+                if (names == null) ;
+                else {
+                    textLength = newText.length();
+                    if (!array_sort.isEmpty())
+                        array_sort.clear();
+                    for (int i = 0; i < names.size(); i++) {
+                        if (textLength <= names.get(i).length()) {
+                            if (names.get(i).toLowerCase().contains(
+                                    newText.toLowerCase().trim())) {
+                                array_sort.add(names.get(i));
+                            }
+                        }
+                    }
+                    AppendList(array_sort);
+                }
+
                 return false;
             }
         });
@@ -113,5 +143,23 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         mCursorAdapter.swapCursor(null);
 
     }
+
+    public void refreshSearch() {
+        names = dbHelper.getNames();
+        if (names == null)
+            mAdapter = new ListAdapter(this);
+        else
+            mAdapter = new ListAdapter(this, names);
+        dataListView.setAdapter(mAdapter);
+
+    }
+
+    public void AppendList(ArrayList<String> str) {
+        ListAdapter adapter = new ListAdapter(this, str);
+
+        dataListView.setAdapter(adapter);
+    }
+
+
 
 }

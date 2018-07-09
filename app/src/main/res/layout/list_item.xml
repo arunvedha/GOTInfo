@@ -3,14 +3,22 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
+    android:orientation = "horizontal"
     android:padding="16dp">
+
+    <ImageView
+        android:layout_width="30dp"
+        android:src="@drawable/history"
+        android:layout_height="30dp" />
 
     <TextView
         android:id="@+id/name_of_character"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:fontFamily="sans-serif-medium"
-        android:textAppearance="?android:textAppearanceMedium"
-        android:textColor="#2B3D4D"  />
+        android:textAllCaps="true"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="match_parent"
+        android:paddingLeft="16dp"
+        android:textSize="16dp" />
+
+
 </LinearLayout>
